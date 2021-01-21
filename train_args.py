@@ -1,3 +1,5 @@
+# import sys
+# sys.path.append("F:/DDSM/codeForObjectDetection/")
 import os
 import torch
 import torch.nn as nn
@@ -13,6 +15,7 @@ import random
 from tqdm import tqdm
 
 from Loss import DiceLoss, compute_dice, FocalLoss, SoftDiceLoss
+# from dataloader import Dataloader
 from dataloader import HubDataset
 from model import HuBMAP_model as Model
 
@@ -28,9 +31,10 @@ class Train_Config:
         self.batch_size = 32
         self.max_epoch = 12
         self.lr_config = dict(warmup='linear',warmup_iters=500, step=[8, 11])
-        self.optimizer = dict(type='SGD', lr=self.batch_size*0.00125, momentum=0.9, weight_decay=0.0001)
+        self.optimizer = dict(type='SGD', lr=min(self.batch_size*0.00125, 0.02), momentum=0.9, weight_decay=0.0001)
         # self.optimizer = dict(type='Adam', lr=0.001)
-        self.with_se = True
+        self.backbone_name = "resnest"#目前仅支持resnest、se_resnext，分别对应resnest50和se_resnext50_32x4d
+        self.with_se = True#这个仅在resnest时有效
         self.seed = 26
         self.img_size = (512, 512)
         self.load_from = "./model_state/resnest50_fpn_coco.pth"
@@ -64,8 +68,9 @@ if not os.path.exists(workname):
     os.makedirs(workname)
 
 #初始化模型
-# print(getattr(config, 'with_se', False))
-model = Model(with_se=getattr(config, 'with_se', False),model_path=getattr(config, 'load_from', None))
+model = Model(backbonename=getattr(config, 'backbone_name', "resnest"),
+                with_se=getattr(config, 'with_se', False), 
+                model_path=getattr(config, 'load_from', None))
 model.to(device)
 
 #初始化dataloder

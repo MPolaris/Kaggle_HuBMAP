@@ -44,12 +44,13 @@ main_bar = tqdm(filelist)
 
 for fn in main_bar:
     img = get_data(dataroot + fn)
-    mask = np.zeros(img.shape[:2], dtype=np.float16)
+    mask = np.zeros(img.shape[:2], dtype=np.uint8)
     mesh_grid = make_grid(img.shape[:2], window_size, overlap)
     with torch.no_grad():
         sub_bar = tqdm(mesh_grid, leave=False)
         sub_bar.set_description("First epoch pred")
         for (x1, x2, y1, y2) in sub_bar:
+
             patch = cv2.resize(img[x1:x2, y1:y2], input_size)
             temp = patch.mean((0, 1))
             if sum(abs(temp - temp.mean())) < 30:
@@ -74,19 +75,20 @@ for fn in main_bar:
                     pred_mask += pred_mask
             pred_mask = pred_mask/len(models)
             pred_mask = (pred_mask >= 0.5).astype(np.uint8)
-            pred_mask = cv2.resize(pred_mask, dsize=(window_size, window_size), interpolation = cv2.INTER_NEAREST)
 
-            if pred_mask.sum() < 20000:
+            if pred_mask.sum() < 5000:
                 continue
 
             props = regionprops(label(pred_mask, connectivity = pred_mask.ndim))
             for p in props:
                 bbox = list(p.bbox)
-                if pred_mask[bbox[0]:bbox[2], bbox[1]:bbox[3]].sum() < 20000:
+                if pred_mask[bbox[0]:bbox[2], bbox[1]:bbox[3]].sum() < 5000:
                     pred_mask[bbox[0]:bbox[2], bbox[1]:bbox[3]] = 0
 
-            if pred_mask.sum() > 20000:
-                mask[x1:x2, y1:y2] = pred_mask
+            if pred_mask.sum() > 5000:
+                pred_mask = cv2.resize(pred_mask, dsize=(window_size, window_size), interpolation = cv2.INTER_NEAREST)
+                if mask[x1:x2, y1:y2].shape == pred_mask.shape:
+                    mask[x1:x2, y1:y2] = pred_mask
 
             # if True and pred_mask.sum() > 5000:
             #     sub_bar.write(str(pred_mask.sum()))

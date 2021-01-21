@@ -8,9 +8,15 @@ from .resnet import resnest50
 from .se_resnext import se_resnext50_32x4d
 
 class HuBMAP_model(nn.Module):
-    def __init__(self, num_class=1, use_sigmoid=True, with_se=False, model_path="./resnest50_fpn_coco.pth"):
+    def __init__(self, num_class=1, backbonename="resnest", use_sigmoid=True, with_se=False, model_path="./resnest50_fpn_coco.pth"):
         super(HuBMAP_model, self).__init__()
-        self.backbone = resnest50(with_se=with_se)
+        if backbonename == "resnest":
+            self.backbone = resnest50(with_se=with_se)
+        elif backbonename == "se_resnext":
+            self.backbone = se_resnext50_32x4d()
+        else:
+            self.backbone = resnest50(with_se=with_se)
+
         self.fpn = FPN(in_channels=[256, 512, 1024, 2048], out_channels=256, num_outs=4)
         num_class = num_class if use_sigmoid else num_class+1
         self.predictor = nn.Conv2d(256, num_class, 3, 1, 1, bias=True)

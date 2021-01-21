@@ -14,7 +14,7 @@
 
 ## 模型：
 Supported backbones:
-- [x] ResNet
+- [ ] ResNet
 - [x] ResNeXt
 - [x] ResNeSt
 
@@ -22,6 +22,11 @@ Supported attention modual:
 - [x] SE
 - [ ] CBAM
 
+## 损失函数：
+- [x] FocalLoss
+- [x] BCE
+- [x] Dice
+
 ## TODO:
-- [ ] 支持可以在config里面配置主干网络
-- [ ] 优化整个训练流程
+- [X] 支持可以在config里面配置主干网络
+- [ ] 继续优化整个训练流程

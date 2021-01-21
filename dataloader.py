@@ -104,7 +104,7 @@ class HubDataset(D.Dataset):
                         A.CLAHE(clip_limit=2),
                         A.RandomBrightnessContrast(),
                     ], p=0.5),
-
+                
                 A.OneOf([
                     A.RandomContrast(),
                     A.RandomGamma(),
