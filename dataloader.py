@@ -1,3 +1,4 @@
+from albumentations.augmentations.transforms import ChannelShuffle
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -96,6 +97,7 @@ class HubDataset(D.Dataset):
             self.transform = A.Compose([
                 A.HorizontalFlip(p=0.5),
                 A.VerticalFlip(p=0.5),
+                A.ChannelShuffle(p=0.25),
             
                 A.OneOf([
                         A.HueSaturationValue(12,12,12, p=0.8),
@@ -251,37 +253,3 @@ if __name__ == "__main__":
     for img, mask in loader:
         print(img.shape)
         print(mask.shape)
-
-# id_ = "1e2425f28"
-# filepath = "data/{}.tiff".format(id_)
-# identity = rasterio.Affine(1, 0, 0, 0, 1, 0)
-# train_csv = pd.read_csv('data/train.csv')
-# dataset = rasterio.open(filepath, transform = identity)
-
-# mask = rle_decode(train_csv.loc[train_csv['id'] == id_]['encoding'].values[0], dataset.shape)
-# mask_re = cv2.resize(mask,(1024, 1024))
-# plt.figure(figsize=(5,5))
-# plt.axis('off')
-# plt.imshow(mask_re)
-# plt.show()
-
-# slices = make_grid(dataset.shape, window=1024, min_overlap=256)
-# threshold = 100
-# for slc in tqdm(slices):
-#     x1,x2,y1,y2 = slc
-#     if mask[x1:x2,y1:y2].sum() > threshold or np.random.randint(100) > 120:
-#         image = dataset.read([1,2,3],
-#             window=Window.from_slices((x1,x2),(y1,y2)))
-#         image = np.moveaxis(image, 0, -1)
-#         trans_img = trfm(image=image, mask=mask[x1:x2,y1:y2])
-#         plt.figure(figsize=(10,5))
-#         plt.subplot("121")
-#         plt.axis('off')
-#         plt.imshow(image)
-#         plt.imshow(mask[x1:x2,y1:y2], alpha=0.5)
-
-#         plt.subplot("122")
-#         plt.axis('off')
-#         plt.imshow(trans_img['image'])
-#         plt.imshow(trans_img['mask'], alpha=0.5)
-#         plt.show()
